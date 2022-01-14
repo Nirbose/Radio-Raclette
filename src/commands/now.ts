@@ -5,11 +5,12 @@ export default new app.Command({
   description: "The now command",
   channelType: "all",
   async run(message) {
-    const time = app.dayjs().unix() - app.Queu.queu.startSong
+    const song = app.Radio.queu.songs
+    const time = app.dayjs().unix() - app.Radio.queu.startSong
     const parse = app.dayjs(time * 1000).format("mm:ss")
 
     let bar = "—".repeat(15)
-    let progress = Math.ceil(time / app.Queu.queu.songs.duration.seconds * bar.length)
+    let progress = Math.ceil(time / song.duration.seconds * bar.length)
     let split = bar.split('')
     split[progress] = "O"
 
@@ -18,10 +19,10 @@ export default new app.Command({
         name: message.author.username,
         iconURL: message.author.displayAvatarURL(),
       })
-      .setThumbnail(app.Queu.queu.songs.thumbnail)
-      .setTitle(app.Queu.queu.songs.title)
-      .setURL(app.Queu.queu.songs.url)
-      .setDescription(`\`[${parse}]\` / \`[${app.Queu.queu.songs.duration.timestamp}]\`\n${split.join('')}`)
+      .setThumbnail(song.thumbnail)
+      .setTitle(song.title)
+      .setURL(song.url)
+      .setDescription(`\`[${parse}]\` / \`[${song.duration.timestamp}]\`\n${split.join('')}`)
       .setColor('BLURPLE')
 
     // todo: code here

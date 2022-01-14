@@ -39,7 +39,7 @@ const listener: app.Listener<"ready"> = {
       )
     })
 
-    app.Queu.radioRun(client)
+    new app.Radio.Radio(client).run()
   },
 }
 
