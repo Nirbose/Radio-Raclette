@@ -1,10 +1,11 @@
+import * as logger from "../app/logger.js"
 import yts from 'yt-search'
 import ytdl from 'ytdl-core'
 import { joinVoiceChannel, DiscordGatewayAdapterCreator, createAudioPlayer, NoSubscriberBehavior, createAudioResource, AudioPlayerStatus, VoiceConnection } from "@discordjs/voice"
-import { Client, Guild, VoiceChannel } from "discord.js"
+import { Client, Guild } from "discord.js"
 import dayjs from 'dayjs';
 
-const channelId = ["818590955677417515"]
+const channelId = ["818590955677417515", "877174466873020466"]
 
 const keys = [
     // Année 70 (pour un theme)
@@ -82,11 +83,11 @@ export class Radio {
         }
 
         this.player.on(AudioPlayerStatus.Idle, () => {
-            this.songs()
+            this.run()
         })
 
         this.player.on('error', (err) => {
-            console.log(err.message)
+            logger.log(err.message)
         })
     }
 
