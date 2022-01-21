@@ -5,7 +5,7 @@ import { joinVoiceChannel, DiscordGatewayAdapterCreator, createAudioPlayer, NoSu
 import { Client, Guild } from "discord.js"
 import dayjs from 'dayjs';
 
-const channelId = ["818590955677417515", "877174466873020466", "828281176887656459"]
+const channelId = ["818590955677417515", "934146913010339840", "828281176887656459"]
 
 const keys = [
     // Année 70 (pour un theme)
@@ -124,7 +124,7 @@ export class Radio {
         const videos = await (await yts(keys[0][Math.floor(Math.random() * keys[0].length)])).videos.slice(0, 5)
         let videosSave: yts.VideoSearchResult[] = []
         videos.forEach((video, index) => {
-            if (video.duration.seconds <= 300 || this.emitionLoad) {
+            if (video.duration.seconds <= 300) {
                 videosSave.push(video)
             } else {
                 if (index === videos.length - 1) {
