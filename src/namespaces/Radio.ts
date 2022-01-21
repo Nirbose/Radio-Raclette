@@ -1,14 +1,15 @@
 import yts from 'yt-search'
 import ytdl from 'ytdl-core'
-import { joinVoiceChannel, DiscordGatewayAdapterCreator, createAudioPlayer, NoSubscriberBehavior, createAudioResource, AudioPlayerStatus } from "@discordjs/voice"
-import { Client, VoiceChannel } from "discord.js"
+import { joinVoiceChannel, DiscordGatewayAdapterCreator, createAudioPlayer, NoSubscriberBehavior, createAudioResource, AudioPlayerStatus, VoiceConnection } from "@discordjs/voice"
+import { Client, Guild, VoiceChannel } from "discord.js"
 import dayjs from 'dayjs';
 
 const channelId = ["818590955677417515"]
 
 const keys = [
+    // Année 70 (pour un theme)
     [
-        "tendence misic", "danse", "religion Isak danielson", "Lie to me Riell"
+        "tendence misic", "danse", "religion Isak danielson", "Lie to me Riell", "To Feet", "Ambre", "Maxence", "Twenty One pilote"
     ],
     [
         "underscore", "micode"
@@ -33,23 +34,31 @@ export class Radio {
 
     public async join()
     {
+        let joins: VoiceConnection[] = [];
+        
         this.client.guilds.cache.forEach(guild => {
             guild.channels.cache.forEach(async (channel) => {
                 if (channelId.includes(channel.id)) {
-                    return joinVoiceChannel({
+                    let join = joinVoiceChannel({
                         channelId: channel.id,
                         guildId: guild.id,
                         adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
                     })
+                    
+                    joins.push(join)
                 }
             })
         })
 
-        return joinVoiceChannel({
+        if (joins.length > 0) {
+            return joins
+        }
+
+        return [joinVoiceChannel({
             channelId: "818590955677417515",
-            guildId: "717098989831005184",
-            adapterCreator: (await this.client.guilds.fetch("717098989831005184")).voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
-        })
+            guildId: "781105165754433537",
+            adapterCreator: (await this.client.guilds.cache.get("781105165754433537") as Guild).voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
+        })]
     }
 
     public async run()
@@ -60,8 +69,10 @@ export class Radio {
             // Création de l'audio pour discord
             this.player.play(createAudioResource(ytdl(song.url)))
 
-            const join = await this.join()
-            join.subscribe(this.player)
+            const joins = await this.join()
+            joins.forEach(join => {
+                join.subscribe(this.player)
+            })
 
             // Savegarde dans la queue
             queu.songs = song
