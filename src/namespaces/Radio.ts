@@ -11,10 +11,14 @@ const keys = [
     // Année 70 (pour un theme)
     [
         "tendence misic", "danse", "religion Isak danielson", "Lie to me Riell", "To Feet", "Ambre", "Maxence", "Twenty One pilote"
-    ],
-    [
-        "underscore", "micode"
     ]
+]
+const emitions = [
+    {
+        title: "micode balle perdue",
+        author: "Micode",
+        filter: "CAI%253D"
+    }
 ]
 
 export let queu = {
@@ -65,6 +69,7 @@ export class Radio {
     public async run()
     {
         const song = await this.songs()
+        // const song = await this.emitions()
         if (typeof song !== "boolean") {
 
             // Création de l'audio pour discord
@@ -81,6 +86,8 @@ export class Radio {
         } else {
             this.songs()
         }
+
+        this.player.setMaxListeners(10)
 
         this.player.on(AudioPlayerStatus.Idle, () => {
             this.run()
@@ -112,5 +119,14 @@ export class Radio {
         } else {
             return false
         }
+    }
+
+    private async emitions(): Promise<yts.VideoSearchResult> {
+        const videos = await yts({
+            query: emitions[0].title,
+            sp: emitions[0].filter
+        })
+
+        return videos.videos[0]
     }
 }
