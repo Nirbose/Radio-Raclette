@@ -5,19 +5,29 @@ import { joinVoiceChannel, DiscordGatewayAdapterCreator, createAudioPlayer, NoSu
 import { Client, Guild } from "discord.js"
 import dayjs from 'dayjs';
 
-const channelId = ["818590955677417515", "877174466873020466"]
+const channelId = ["818590955677417515", "877174466873020466", "828281176887656459"]
 
 const keys = [
     // Année 70 (pour un theme)
     [
-        "tendence misic", "danse", "religion Isak danielson", "Lie to me Riell", "To Feet", "Ambre", "Maxence", "Twenty One pilote"
+        "religion Isak danielson", "Lie to me Riell", "To Feet", "Ambre", "Tessae", "Twenty One pilote"
     ]
 ]
-const emitions = [
+
+interface Emitions { 
+    title: string
+    author: string
+    started_at: string
+    filter?: string
+    days?: number[]
+}
+
+export const emitions: Emitions[] = [
     {
         title: "micode balle perdue",
         author: "Micode",
-        filter: "CAI%253D"
+        filter: "CAI%253D",
+        started_at: "18:26",
     }
 ]
 
@@ -27,14 +37,17 @@ export let queu = {
 }
 
 export class Radio {
+    public emition = {
+        title: "none",
+        filter: "none",
+    } as Emitions
+
     private player
+    private emitionLoad = false
+    private read = false
 
     constructor(private client: Client) {
-        this.player = createAudioPlayer({
-            behaviors: {
-                noSubscriber: NoSubscriberBehavior.Pause,
-            },
-        })
+        this.player = createAudioPlayer()
     }
 
     public async join()
@@ -66,10 +79,14 @@ export class Radio {
         })]
     }
 
-    public async run()
+    public async run(emition = false)
     {
-        const song = await this.songs()
-        // const song = await this.emitions()
+        let song = await this.songs()
+
+        if (this.emitionLoad) return
+        if (emition) song = await this.emitions()
+        if (!this.emitionLoad && this.read) return
+
         if (typeof song !== "boolean") {
 
             // Création de l'audio pour discord
@@ -83,6 +100,7 @@ export class Radio {
             // Savegarde dans la queue
             queu.songs = song
             queu.startSong = dayjs().unix()
+            this.read = true
         } else {
             this.songs()
         }
@@ -90,6 +108,9 @@ export class Radio {
         this.player.setMaxListeners(10)
 
         this.player.on(AudioPlayerStatus.Idle, () => {
+            if (this.emitionLoad) this.emitionLoad = false
+            if (this.read) this.read = false
+
             this.run()
         })
 
@@ -100,13 +121,13 @@ export class Radio {
 
     private async songs(): Promise<boolean | yts.VideoSearchResult>
     {
-        const videos = await yts(keys[0][Math.floor(Math.random() * keys[0].length)])
+        const videos = await (await yts(keys[0][Math.floor(Math.random() * keys[0].length)])).videos.slice(0, 5)
         let videosSave: yts.VideoSearchResult[] = []
-        videos.videos.forEach((video, index) => {
-            if (video.duration.seconds <= 360) {
+        videos.forEach((video, index) => {
+            if (video.duration.seconds <= 300 || this.emitionLoad) {
                 videosSave.push(video)
             } else {
-                if (index === videos.videos.length - 1) {
+                if (index === videos.length - 1) {
                     this.songs()
                 }
             }
@@ -121,11 +142,13 @@ export class Radio {
         }
     }
 
-    private async emitions(): Promise<yts.VideoSearchResult> {
+    private async emitions(): Promise<yts.VideoSearchResult | boolean> {
         const videos = await yts({
-            query: emitions[0].title,
-            sp: emitions[0].filter
+            query: this.emition.title,
+            sp: this.emition.filter
         })
+
+        this.emitionLoad = true
 
         return videos.videos[0]
     }

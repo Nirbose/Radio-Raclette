@@ -39,7 +39,19 @@ const listener: app.Listener<"ready"> = {
       )
     })
 
-    new app.Radio.Radio(client).run()
+    let radio = new app.Radio.Radio(client)
+    radio.run()
+
+    setInterval(() => {
+      let date = app.dayjs().format("HH:mm")
+
+      app.Radio.emitions.forEach(emition => {
+        if (date == emition.started_at) {
+          radio.emition = emition
+          radio.run(true)
+        }
+      })
+    }, 10000)
   },
 }
 
