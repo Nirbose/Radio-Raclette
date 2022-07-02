@@ -3,16 +3,26 @@ import yts from 'yt-search'
 import ytdl from 'ytdl-core'
 import { joinVoiceChannel, DiscordGatewayAdapterCreator, createAudioPlayer, NoSubscriberBehavior, createAudioResource, AudioPlayerStatus, VoiceConnection } from "@discordjs/voice"
 import { Client, Guild } from "discord.js"
+import { parse } from "yaml"
 import dayjs from 'dayjs';
+import console from "console"
+import path from 'path';
+import fs from 'fs';
+import { URL } from "url"
 
-const channelId = ["818590955677417515", "934146913010339840", "828281176887656459"]
+interface YamlInterface {
+    voiceId: string[]
+    keys: string[]
+}
 
-const keys = [
-    // Année 70 (pour un theme)
-    [
-        "religion Isak danielson", "Lie to me Riell", "To Feet", "Ambre", "Tessae", "Twenty One pilote"
-    ]
-]
+const yamlFile = fs.readFileSync(new URL('../../radio.yaml', import.meta.url), 'utf8')
+const yaml: YamlInterface = parse(yamlFile, { schema: 'failsafe' })
+
+console.log(yaml)
+
+const channelId = yaml.voiceId
+
+const keys = yaml.keys
 
 interface Emitions { 
     title: string
@@ -110,7 +120,7 @@ export class Radio {
         this.player.on(AudioPlayerStatus.Idle, () => {
             if (this.emitionLoad) this.emitionLoad = false
             if (this.read) this.read = false
-
+            console.log('oui')
             this.run()
         })
 
@@ -126,12 +136,12 @@ export class Radio {
         videos.forEach((video, index) => {
             if (video.duration.seconds <= 300) {
                 videosSave.push(video)
-            } else {
-                if (index === videos.length - 1) {
-                    this.songs()
-                }
-            }
+            } 
         })
+
+        if (videosSave.length === 0) {
+            return this.songs()
+        }
 
         const video = videosSave[Math.floor(Math.random() * videosSave.length)]
 
